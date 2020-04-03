@@ -176,9 +176,6 @@
         var rebuildable = true;
         var nav_x = selectedCell.x - lowest_x;
         var nav_y = selectedCell.y - lowest_y;
-        //if cell was already configured, don't rebuild map
-        if(table.rows[nav_y].cells[nav_x].innerHTML.indexOf("assets/add.png") == -1)
-            rebuildable = false;
         table.rows[nav_y].cells[nav_x].innerHTML = "";
 
         var img = document.createElement('img');
