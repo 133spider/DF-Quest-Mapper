@@ -1,0 +1,312 @@
+<html>
+<head>
+<title>DF Quest Mapper - v0.1</title>
+<center>
+    <header>
+        <h1 style="font-family: BD Merced;">DF Quest Mapper</h1>
+        <p>Created by 133spider</p>
+    </header>
+</center>
+<style>
+    body{
+        background-color: darkred;
+    }
+
+    table td{
+        padding: 0px;
+        border: 0px solid black;
+    }
+
+    table{
+        margin: auto;
+    }
+
+     /* The Modal (background) */
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    }
+
+    /* Modal Content/Box */
+    .modal-content {
+        background-color: darkred;
+        margin: 15% auto; /* 15% from the top and centered */
+        padding: 20px;
+        border: 1px solid black;
+        width: 80%; /* Could be more or less, depending on screen size */
+    }
+
+    /* The Close Button */
+    .close {
+        color: black;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    } 
+
+    h1,
+    p {
+        color: yellow;
+        text-shadow: 1px 1px 4px black;
+    }
+</style>
+</head>
+<div id="modal_add" class="modal">
+
+    <!-- Modal content -->
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <p style="font-size: x-large;">Add a route</p>
+        <table>
+            <tbody>
+                <p>Reset/Undo</p>
+                <tr>
+                    <img onclick="setCell(this)" src="assets/add.png"></img>
+                </tr>
+            </tbody>
+            <tbody>
+                <p>Straight</p>
+                <tr>
+                    <img onclick="setCell(this)" src="assets/straight0.png"></img>
+                    <img onclick="setCell(this)" src="assets/straight1.png"></img>
+                </tr>
+            </tbody>
+            <tbody>
+                <p>Turn</p>
+                <tr>
+                    <img onclick="setCell(this)" src="assets/upleft.png"></img>
+                    <img onclick="setCell(this)" src="assets/upright.png"></img>
+                    <img onclick="setCell(this)" src="assets/downleft.png"></img>
+                    <img onclick="setCell(this)" src="assets/downright.png"></img>
+                </tr>
+            </tbody>
+            <tbody>
+                <p>Cross</p>
+                <tr>
+                    <img onclick="setCell(this)" src="assets/cross.png"></img>
+                    <img onclick="setCell(this)" src="assets/crossup.png"></img>
+                    <img onclick="setCell(this)" src="assets/crossdown.png"></img>
+                    <img onclick="setCell(this)" src="assets/crossleft.png"></img>
+                    <img onclick="setCell(this)" src="assets/crossright.png"></img>
+                </tr>
+            </tbody>
+            <tbody>
+                <p>End</p>
+                <tr>
+                    <img onclick="setCell(this)" src="assets/endup.png"></img>
+                    <img onclick="setCell(this)" src="assets/enddown.png"></img>
+                    <img onclick="setCell(this)" src="assets/endleft.png"></img>
+                    <img onclick="setCell(this)" src="assets/endright.png"></img>
+                </tr>
+            </tbody>
+            <tbody>
+                <p>Diagnol</p>
+                <tr>
+                    <img onclick="setCell(this)" src="assets/upleftdiagnol.png"></img>
+                    <img onclick="setCell(this)" src="assets/uprightdiagnol.png"></img>
+                    <img onclick="setCell(this)" src="assets/downleftdiagnol.png"></img>
+                    <img onclick="setCell(this)" src="assets/downrightdiagnol.png"></img>
+                </tr>
+            </tbody>
+            <tbody>
+                <p>Miscellaneous</p>
+                <tr>
+                    <img onclick="setCell(this)" src="assets/healingpad.png"></img>
+                    <img onclick="setCell(this)" src="assets/healthpad.png"></img>
+                    <img onclick="setCell(this)" src="assets/manapad.png"></img>
+                    <img onclick="setCell(this)" src="assets/chest.png"></img>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+<script>
+    var largest_x = 2;
+    var largest_y = 2;
+    var lowest_x = 0;
+    var lowest_y = 0;
+
+    var map_data = [];
+    var table;
+
+    var modal = document.getElementById("modal_add");
+    var modal_add_close = document.getElementsByClassName("close")[0];
+    modal_add_close.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    var selectedCell = {x: 0, y: 0, src: "assets/add.png"};
+    showModalAdd = function(e){
+        selectedCell.x = e.target.pos.x;
+        selectedCell.y = e.target.pos.y;
+        modal.style.display = "block";
+    }
+
+    hasKeys = function(keys, target){
+        for(var i = 0; i < keys.length; i++)
+            if(target.indexOf(keys[i]) > -1)
+                return true;
+        return false;
+    }
+
+    setPrevious = function(e){
+        selectedCell.x = e.target.pos.x;
+        selectedCell.y = e.target.pos.y;
+        e.src = selectedCell.src;
+        setCell(e);
+    }
+
+    setCell = function(e){
+        selectedCell.src = e.src.substring(e.src.indexOf("assets/"));
+
+        var rebuildable = true;
+        var nav_x = selectedCell.x - lowest_x;
+        var nav_y = selectedCell.y - lowest_y;
+        //if cell was already configured, don't rebuild map
+        if(table.rows[nav_y].cells[nav_x].innerHTML.indexOf("assets/add.png") == -1)
+            rebuildable = false;
+        table.rows[nav_y].cells[nav_x].innerHTML = "";
+
+        var img = document.createElement('img');
+        img.src = e.src;
+        table.rows[nav_y].cells[nav_x].appendChild(img);
+        map_data[selectedCell.x][selectedCell.y] = e.src;
+
+        if(hasKeys(["end", "pad.png", "chest.png"], e.src))
+            rebuildable = false;
+
+        //if the route selected was not the reset cell, then rebuild map
+        if(e.src.indexOf("assets/add.png") == -1 && rebuildable)
+            if(selectedCell.y == largest_y){
+                if(selectedCell.x == lowest_x){
+                    lowest_x--;
+                    largest_y++;
+                }else if(selectedCell.x == largest_x){
+                    largest_y++;
+                    largest_x++;
+                }else{
+                    largest_y++;
+                }
+            }else if(selectedCell.y == lowest_y){
+                if(selectedCell.x == lowest_x){
+                    lowest_x--;
+                    lowest_y--;
+                }else if(selectedCell.x == largest_x){
+                    largest_x++;
+                    lowest_y--;
+                }else{
+                    lowest_y--;
+                }
+            }else{
+                if(selectedCell.x == lowest_x){
+                    lowest_x--;
+                }else if(selectedCell.x == largest_x){
+                    largest_x++;
+                }
+            }
+        rebuildMap();
+        modal.style.display = "none";
+    }
+
+    reset = function(){
+        if(confirm('Are you sure you want to reset the Quest Mapper?'))
+            window.location.reload(false);
+    }
+
+    rebuildMap = function(){
+        var body = document.body;
+        table.innerHTML = "";
+        var t_table = document.createElement('table');
+        var tbody = document.createElement('tbody');
+        t_table.appendChild(tbody);
+
+        for(var i = lowest_y; i < (largest_y+1); i++){
+            var tr = document.createElement('tr');
+            tbody.appendChild(tr);
+
+            for(var j = lowest_x; j < (largest_x+1); j++){
+                var td = document.createElement('td');
+                var img = document.createElement('img');
+                
+                img.src = (map_data[j] && map_data[j][i] ? map_data[j][i] : "assets/add.png");
+                if(img.src.indexOf("assets/start.png") == -1){
+                    img.addEventListener("click", showModalAdd);
+                    img.addEventListener("contextmenu", setPrevious);
+                }else{
+                    img.addEventListener("click", reset);
+                }
+
+                img.pos = {x: j, y: i};
+                td.appendChild(img);
+                tr.appendChild(td);
+                if(!map_data[j])
+                    map_data[j] = [];
+            }
+        }
+        table = t_table;
+        body.appendChild(table);
+    }
+
+    window.onload = function(){
+        var body = document.body;
+        var t_table = document.createElement('table');
+        var tbody = document.createElement('tbody');
+        t_table.appendChild(tbody);
+
+        //vertical
+        for(var i = 0; i < (largest_x+1); i++){
+            var tr = document.createElement('tr');
+            tbody.appendChild(tr);
+
+            //horizontal
+            for(var j = 0; j < (largest_x+1); j++){
+                var td = document.createElement('td');
+                var img = document.createElement('img');
+                if(i == 1 && j == 1){
+                    img.src = "assets/start.png";
+                }else{
+                    img.src = "assets/add.png";
+                    img.addEventListener("click", showModalAdd);
+                }
+                img.pos = {x: j, y: i};
+                td.appendChild(img);
+                tr.appendChild(td);
+                if(!map_data[j])
+                    map_data[j] = [];
+                map_data[j][i] = img.src;
+            }
+            //0, 1, 2
+            //rows: vertical
+            //cells: horizontal
+        }
+        table = t_table;
+        body.appendChild(table);
+    }
+</script>
+<body oncontextmenu="return false;">
+</body>
+<footer>
+    <center>
+        <p>
+        Click on "Start" to reset the Quest Mapper<br>
+        Right-click: Set cell as previously selected route
+        </p>
+    </center>
+</footer>
+</html>
