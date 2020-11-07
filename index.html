@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>DF Quest Mapper - v0.1</title>
+<title>DF Quest Mapper - v0.2</title>
 <center>
     <header>
         <h1 style="font-family: BD Merced;">DF Quest Mapper</h1>
@@ -19,6 +19,10 @@
 
     table{
         margin: auto;
+    }
+
+    .waypoint {
+        filter: invert()
     }
 
      /* The Modal (background) */
@@ -149,10 +153,17 @@
         modal.style.display = "none";
     }
 
+    var checkPoint;
     var selectedCell = {x: 0, y: 0, src: "assets/add.png"};
     showModalAdd = function(e){
         selectedCell.x = e.target.pos.x;
         selectedCell.y = e.target.pos.y;
+        if(e.shiftKey){
+            checkPoint = (checkPoint && checkPoint.x == selectedCell.x && checkPoint.y == selectedCell.y 
+                ? null : {x: e.target.pos.x, y: e.target.pos.y});
+            rebuildMap();
+            return;   
+        }
         modal.style.display = "block";
     }
 
@@ -248,6 +259,11 @@
                 }
 
                 img.pos = {x: j, y: i};
+
+                if(checkPoint)
+                    if(checkPoint.x == j && checkPoint.y == i)
+                        img.style.filter = "invert()"
+
                 td.appendChild(img);
                 tr.appendChild(td);
                 if(!map_data[j])
@@ -300,7 +316,8 @@
     <center>
         <p>
         Click on "Start" to reset the Quest Mapper<br>
-        Right-click: Set cell as previously selected route
+        Right-click: Set cell as previously selected route<br>
+        Shift-click: Set cell as checkpoint
         </p>
     </center>
 </footer>
