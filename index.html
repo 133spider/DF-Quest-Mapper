@@ -195,7 +195,7 @@
         table.rows[nav_y].cells[nav_x].appendChild(img);
         map_data[selectedCell.x][selectedCell.y] = e.src;
 
-        if(hasKeys(["end", "pad.png", "chest.png"], e.src))
+        if(hasKeys(["end", "pad.png", "chest.png", "finish.png"], e.src))
             rebuildable = false;
 
         //if the route selected was not the reset cell, then rebuild map
